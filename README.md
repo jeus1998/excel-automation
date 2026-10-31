@@ -1,37 +1,33 @@
 # Container Workbench
 
-오프라인 우선 엑셀 컨테이너 번호 대조·금액 비교 데스크톱 앱입니다. 첫 화면에서 서비스를 고르면 해당 작업 화면으로 이동하고, 결과는 앱의 넓은 결과 화면에서 조회합니다. 앱 화면에서 결과 엑셀을 만들지는 않습니다.
+엑셀 파일의 컨테이너 번호와 운송 금액을 비교하는 데스크톱 앱입니다. 결과는 앱 화면에서 확인할 수 있습니다.
 
-## 설치 파일 만들기
+## 다운로드 및 설치
 
-최종 사용자는 Python을 설치하지 않고 Windows 설치 프로그램 또는 macOS 앱 디스크 이미지를 설치해 실행할 수 있습니다. 설치 파일은 각 운영체제에서 해당 운영체제용으로 빌드해야 합니다.
+### Windows
 
-- macOS: Python 3.10 이상이 있는 Mac에서 `bash scripts/build_mac.sh`를 실행합니다. `dist/Container-Workbench-macOS.dmg`가 만들어지며, DMG를 열어 앱을 Applications 폴더로 옮기세요.
-- Windows: Windows PC에 Python 3.10 이상과 Inno Setup 6을 설치한 뒤 `scripts\\build_windows.bat`을 더블클릭합니다. `dist/Container-Workbench-Setup.exe`가 만들어집니다.
-- GitHub Releases: `v`로 시작하는 버전 태그를 push하면 두 운영체제용 설치 파일이 자동으로 Release에 올라갑니다. 사용자는 Release 페이지에서 설치 파일을 받으면 됩니다. Actions에서 수동 실행한 빌드는 임시 산출물로 제공됩니다.
+[Windows 설치 파일 다운로드](https://github.com/jeus1998/excel-automation/releases/latest/download/Container-Workbench-Setup.exe)
 
-설치 프로그램은 현재 서명되지 않습니다. macOS에서는 처음 실행할 때 보안 확인을 추가로 거칠 수 있고, Windows에서도 SmartScreen 경고가 표시될 수 있습니다. 배포용 서명은 개발자 인증서가 준비된 뒤 추가할 수 있습니다.
+1. `Container-Workbench-Setup.exe`를 내려받아 실행합니다.
+2. 설치 안내에 따라 설치한 뒤 앱을 실행합니다.
+3. **Python을 별도로 설치할 필요가 없습니다.**
 
-## 개발 실행
+앱 설치 파일은 현재 서명되지 않아 Windows SmartScreen 경고가 표시될 수 있습니다. GitHub의 이 저장소 Release에서 받은 파일인지 확인한 뒤 설치를 진행하세요.
 
-Python 3.10 이상에서 가상환경을 만든 뒤 `pip install -e .`를 실행하고 `python main.py`로 시작합니다.
+### macOS
 
-## 화면 흐름
+[Mac 설치 파일 다운로드](https://github.com/jeus1998/excel-automation/releases/latest/download/Container-Workbench-macOS.dmg)
 
-1. 시작 화면에서 **금액 비교** 또는 **번호 대조**를 선택합니다.
-2. 작업 화면에서 기준 파일과 비교 파일을 불러옵니다.
-3. 각 파일 카드에서 파일 선택 바로 아래의 **시트명**을 고르고, 필요하면 미리보기 위의 **헤더 행** 숫자를 조정합니다.
-4. 비교할 항목 선택에서 기준 파일과 비교 파일 설정을 좌우로 확인합니다. 컨테이너 컬럼을 고르고, 금액 비교에서는 운송사와 금액 컬럼도 선택합니다. 자동 선택이 틀리면 숫자를 조정해 미리보기와 컬럼명을 확인하세요.
-5. **설정 확인 후 비교 시작**을 눌러 승인하면 처리를 시작합니다.
-6. 결과 전용 화면에서 건수 요약, 상태 필터, 상세 표를 확인합니다. **작업 화면으로** 버튼으로 돌아갈 수 있습니다.
+DMG 파일을 열고 `Container Workbench.app`을 Applications 폴더로 옮긴 뒤 실행하세요. 앱 설치 파일은 현재 서명되지 않아 처음 실행할 때 macOS 보안 확인이 표시될 수 있습니다.
 
-첨부된 `resources/images/home_background.png`를 시작 화면 배경으로 사용합니다. 원본 파일은 읽기 전용으로 열며, 결과는 앱 화면에 표시합니다.
+[모든 설치 파일 보기](https://github.com/jeus1998/excel-automation/releases/latest)
 
-## 개발 상태 및 한계
+## 앱 사용 방법
 
-- P0: 수동 컬럼 매핑, 번호 대조, 금액 비교, 중복/누락 분류, 앱 내 결과 화면
-- Windows/macOS 설치 파일은 GitHub Actions에서 운영체제별로 빌드하며 현재 서명되지 않습니다.
-- 지원 입력: `.xlsx`, `.xlsm`, `.xls` (`xlrd` 포함)
-- 컨테이너 번호는 앞뒤 공백 제거 및 대문자화 후 ISO 형식(영문 4자 + 숫자 7자리)에 맞는 값만 비교 결과에 포함합니다. 내부 공백과 하이픈이 있는 값은 제외합니다.
+1. 첫 화면에서 **금액 비교** 또는 **번호 대조**를 선택합니다.
+2. 기준 파일과 비교 파일을 불러옵니다.
+3. 각 파일의 시트를 고르고, 미리보기를 보며 헤더 행과 비교할 열을 선택합니다.
+4. 금액 비교에서는 운송사와 금액 열도 선택합니다.
+5. 설정을 확인한 뒤 비교를 시작하고, 결과 화면에서 상태별 결과를 확인합니다.
 
-인터넷/API 사용 기능은 없습니다. 헤더 자동 탐지는 첫 200행의 밀도와 텍스트/중복 특성을 이용한 추정치이며, 형식이 크게 다르면 헤더 행 숫자를 직접 조정해야 합니다. 개발 테스트는 `pip install -e '.[dev]'` 후 `pytest`로 실행할 수 있습니다.
+지원 파일 형식은 `.xlsx`, `.xlsm`, `.xls`입니다. 컨테이너 번호는 앞뒤 공백을 제거하고 대문자로 바꾼 뒤 영문 4자와 숫자 7자로 된 형식만 비교합니다. 내부 공백이나 하이픈이 포함된 번호는 결과에서 제외됩니다.
