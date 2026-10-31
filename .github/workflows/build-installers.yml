@@ -1,0 +1,35 @@
+name: Build desktop installers
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: bash scripts/build_mac.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Container-Workbench-macOS
+          path: dist/Container-Workbench-macOS.dmg
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: choco install innosetup --yes --no-progress
+      - run: ./scripts/build_windows.ps1
+        shell: pwsh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Container-Workbench-Windows
+          path: dist/Container-Workbench-Setup.exe

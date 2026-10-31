@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Build output and installers
+build/
+dist/
+*.spec
+.pyinstaller-cache/
+
+# Local files and logs
+.DS_Store
+work/
+outputs/*
+*.log
