@@ -8,7 +8,7 @@
 
 - macOS: Python 3.10 이상이 있는 Mac에서 `bash scripts/build_mac.sh`를 실행합니다. `dist/Container-Workbench-macOS.dmg`가 만들어지며, DMG를 열어 앱을 Applications 폴더로 옮기세요.
 - Windows: Windows PC에 Python 3.10 이상과 Inno Setup 6을 설치한 뒤 `scripts\\build_windows.bat`을 더블클릭합니다. `dist/Container-Workbench-Setup.exe`가 만들어집니다.
-- GitHub Actions: 저장소에 push한 뒤 Actions의 **Build desktop installers**를 수동 실행하거나 `v`로 시작하는 버전 태그를 push하면 두 운영체제용 산출물을 각각 내려받을 수 있습니다.
+- GitHub Releases: `v`로 시작하는 버전 태그를 push하면 두 운영체제용 설치 파일이 자동으로 Release에 올라갑니다. 사용자는 Release 페이지에서 설치 파일을 받으면 됩니다. Actions에서 수동 실행한 빌드는 임시 산출물로 제공됩니다.
 
 설치 프로그램은 현재 서명되지 않습니다. macOS에서는 처음 실행할 때 보안 확인을 추가로 거칠 수 있고, Windows에서도 SmartScreen 경고가 표시될 수 있습니다. 배포용 서명은 개발자 인증서가 준비된 뒤 추가할 수 있습니다.
 
@@ -30,9 +30,8 @@ Python 3.10 이상에서 가상환경을 만든 뒤 `pip install -e .`를 실행
 ## 개발 상태 및 한계
 
 - P0: 수동 컬럼 매핑, 번호 대조, 금액 비교, 중복/누락 분류, 앱 내 결과 화면
-- P1: llama.cpp 로컬 LLM 자연어 작업 계획 생성 미구현
-- P2: Windows/macOS 설치 파일 생성 설정 추가; 운영체제별 빌드와 서명은 별도 필요
+- Windows/macOS 설치 파일은 GitHub Actions에서 운영체제별로 빌드하며 현재 서명되지 않습니다.
 - 지원 입력: `.xlsx`, `.xlsm`, `.xls` (`xlrd` 포함)
 - 컨테이너 번호는 앞뒤 공백 제거 및 대문자화 후 ISO 형식(영문 4자 + 숫자 7자리)에 맞는 값만 비교 결과에 포함합니다. 내부 공백과 하이픈이 있는 값은 제외합니다.
 
-인터넷/API 사용 기능은 없습니다. 헤더 자동 탐지는 첫 200행의 밀도와 텍스트/중복 특성을 이용한 추정치이며, 형식이 크게 다르면 헤더 행 숫자를 직접 조정해야 합니다. LLM은 나중에 시트·헤더·컬럼 후보를 제안하는 보조 기능으로 연결할 수 있지만, 실행 전에 사용자가 확인하는 흐름이 안전합니다. 개발 테스트는 `pip install -e '.[dev]'` 후 `pytest`로 실행할 수 있습니다.
+인터넷/API 사용 기능은 없습니다. 헤더 자동 탐지는 첫 200행의 밀도와 텍스트/중복 특성을 이용한 추정치이며, 형식이 크게 다르면 헤더 행 숫자를 직접 조정해야 합니다. 개발 테스트는 `pip install -e '.[dev]'` 후 `pytest`로 실행할 수 있습니다.
