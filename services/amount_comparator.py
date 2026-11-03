@@ -11,17 +11,53 @@ def compare_amounts(reference, comparison, plan, ref_header=0, cmp_header=0):
     results = []
     for key in keys:
         lrows, rrows = left.get(key, []), right.get(key, [])
+        if len(lrows) > 1 or len(rrows) > 1:
+            detail = f"{key} · 기준 {len(lrows)}건, 비교 {len(rrows)}건 중복"
+            # Keep each source occurrence on its own result row. This makes the
+            # source file and exact Excel row clear without packing row numbers
+            # into a single cell.
+            for row_number, record in lrows:
+                carrier, selected = _reference_context(record, ref)
+                row = ComparisonResult(
+                    key, carrier=carrier, applied_amount_column=selected,
+                    reference_row=row_number, status="중복", detail=detail,
+                )
+                try:
+                    row.reference_amount = parse_amount(record[selected]) if selected else None
+                except (ValueError, TypeError, KeyError):
+                    row.reference_amount = None
+                results.append(row)
+            for index, (row_number, record) in enumerate(rrows):
+                context_record = lrows[min(index, len(lrows) - 1)][1] if lrows else None
+                carrier, selected = _reference_context(context_record, ref)
+                row = ComparisonResult(
+                    key, carrier=carrier, applied_amount_column=selected,
+                    comparison_row=row_number, status="중복", detail=detail,
+                )
+                try:
+                    row.comparison_amount = parse_amount(record[cmp.amount_column])
+                except (ValueError, TypeError, KeyError):
+                    row.comparison_amount = None
+                results.append(row)
+            continue
         row = ComparisonResult(key)
         row.reference_row = lrows[0][0] if lrows else None
         row.comparison_row = rrows[0][0] if rrows else None
-        if len(lrows) > 1 or len(rrows) > 1:
-            row.reference_row = ", ".join(str(row_number) for row_number, _ in lrows) or None
-            row.comparison_row = ", ".join(str(row_number) for row_number, _ in rrows) or None
-            row.status = "중복"; row.detail = f"기준 {len(lrows)}건, 비교 {len(rrows)}건; 각 행을 확인하세요"
-        elif not lrows:
+        if not lrows:
             row.status = "기준 파일 누락"
+            if rrows:
+                try:
+                    row.comparison_amount = parse_amount(rrows[0][1][cmp.amount_column])
+                except (ValueError, TypeError, KeyError):
+                    row.comparison_amount = None
         elif not rrows:
             row.status = "비교 파일 누락"
+            _, lrecord = lrows[0]
+            row.carrier, row.applied_amount_column = _reference_context(lrecord, ref)
+            try:
+                row.reference_amount = parse_amount(lrecord[row.applied_amount_column])
+            except (ValueError, TypeError, KeyError):
+                row.reference_amount = None
         else:
             _, lrecord = lrows[0]; _, rrecord = rrows[0]
             carrier = str(lrecord.get(ref.carrier_column, "") or "") if ref.carrier_column else ""
@@ -44,6 +80,18 @@ def compare_amounts(reference, comparison, plan, ref_header=0, cmp_header=0):
                 row.status = "데이터 오류"; row.detail = str(exc)
         results.append(row)
     return results
+
+
+def _reference_context(record, ref):
+    if record is None:
+        return "", ""
+    carrier = str(record.get(ref.carrier_column, "") or "") if ref.carrier_column else ""
+    selected = ref.default_amount_column
+    for rule in ref.amount_rules:
+        if carrier.strip() == rule.value.strip():
+            selected = rule.amount_column
+            break
+    return carrier, selected
 
 
 def _group(frame, column, header):

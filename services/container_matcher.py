@@ -10,9 +10,11 @@ def reconcile_containers(reference, comparison, ref_column, cmp_column, ref_head
     for key in keys:
         left, right = ref_rows.get(key, []), cmp_rows.get(key, [])
         if len(left) > 1 or len(right) > 1:
-            reference_row_numbers = ", ".join(str(row_number) for row_number, _ in left) or None
-            comparison_row_numbers = ", ".join(str(row_number) for row_number, _ in right) or None
-            results.append(ComparisonResult(key, status="중복", reference_row=reference_row_numbers, comparison_row=comparison_row_numbers, detail=f"기준 {len(left)}건, 비교 {len(right)}건; 각 행을 확인하세요"))
+            detail = f"{key} · 기준 {len(left)}건, 비교 {len(right)}건 중복"
+            for row_number, _ in left:
+                results.append(ComparisonResult(key, status="중복", reference_row=row_number, detail=detail))
+            for row_number, _ in right:
+                results.append(ComparisonResult(key, status="중복", comparison_row=row_number, detail=detail))
         elif left and right:
             results.append(ComparisonResult(key, status="양쪽 파일에 존재", reference_row=left[0][0], comparison_row=right[0][0]))
         elif left:

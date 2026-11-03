@@ -50,7 +50,41 @@ def test_duplicate_result_lists_every_source_row():
         "reference": {"sheet": "s", "container_column": "id", "carrier_column": "carrier", "default_amount_column": "amount"},
         "comparison": {"sheet": "s", "container_column": "id", "amount_column": "amount"},
     })
-    result = compare_amounts(left, right, config)[0]
-    assert result.status == "중복"
-    assert result.reference_row == "2, 3"
-    assert result.comparison_row == "2, 3, 4"
+    results = compare_amounts(left, right, config)
+    assert len(results) == 5
+    assert all(result.status == "중복" for result in results)
+    assert [result.reference_row for result in results] == [2, 3, None, None, None]
+    assert [result.comparison_row for result in results] == [None, None, 2, 3, 4]
+    assert [result.reference_amount for result in results[:2]] == [Decimal("10"), Decimal("11")]
+    assert [result.comparison_amount for result in results[2:]] == [Decimal("12"), Decimal("13"), Decimal("14")]
+    assert all(result.carrier == "A" for result in results)
+    assert all(result.applied_amount_column == "amount" for result in results)
+    assert all(result.detail == "SKLU0520719 · 기준 2건, 비교 3건 중복" for result in results)
+
+
+def test_missing_file_status_still_shows_available_amount_and_row():
+    left = pd.DataFrame({
+        "id": ["SKLU0520719"], "carrier": ["광양트랙타"], "charge": [85000],
+    })
+    right = pd.DataFrame({"id": ["TGHU1234567"], "amount": [92000]})
+    config = ComparisonConfig.model_validate({
+        "service": "amount_comparison",
+        "reference": {
+            "sheet": "기준", "container_column": "id", "carrier_column": "carrier",
+            "default_amount_column": "charge",
+        },
+        "comparison": {"sheet": "비교", "container_column": "id", "amount_column": "amount"},
+    })
+
+    results = {result.container_number: result for result in compare_amounts(left, right, config)}
+    missing_comparison = results["SKLU0520719"]
+    assert missing_comparison.status == "비교 파일 누락"
+    assert missing_comparison.reference_row == 2
+    assert missing_comparison.reference_amount == Decimal("85000")
+    assert missing_comparison.carrier == "광양트랙타"
+    assert missing_comparison.applied_amount_column == "charge"
+
+    missing_reference = results["TGHU1234567"]
+    assert missing_reference.status == "기준 파일 누락"
+    assert missing_reference.comparison_row == 2
+    assert missing_reference.comparison_amount == Decimal("92000")
